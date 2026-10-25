@@ -1,0 +1,16 @@
+:root {
+  --fs-canvas: #0B0D10;
+  --fs-surface-1: #13171C;
+  --fs-surface-2: #1B2128;
+  --fs-line: #2B333C;
+  --fs-text-primary: #F3F5F7;
+  --fs-text-muted: #9AA5B1;
+  --fs-keep: #6EDC9A;
+  --fs-review: #F4B740;
+  --fs-reject: #F06464;
+  --fs-focus: #7BA7FF;
+  --fs-brand: #DCE8FF;
+  --fs-radius-control: 6px;
+  --fs-radius-sheet: 10px;
+  --fs-space: 8px;
+}

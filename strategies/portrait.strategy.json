@@ -1,0 +1,44 @@
+{
+  "$schema": "./review-strategy.schema.json",
+  "schemaVersion": 1,
+  "id": "portrait-select",
+  "version": 1,
+  "name": { "zh": "人像精选", "en": "Portrait select" },
+  "note": { "zh": "优先主体与面部清晰，闭眼和表情异常进入复核。", "en": "Prioritize face sharpness and review closed eyes or unusual expressions." },
+  "intent": "Rank portrait frames by face and subject usability while protecting deliberate expression, low light and photographer intent from automatic rejection.",
+  "subjects": {
+    "allowedLabels": ["person"],
+    "minimumConfidence": 0.22,
+    "protectSmallSubjects": false,
+    "protectedContexts": ["environmental portrait", "group portrait", "deliberate silhouette"]
+  },
+  "signals": {
+    "focus": { "enabled": true, "regionPriority": ["face", "subject", "global"], "reviewBelow": 36, "rejectBelow": 14, "protectIntentionalMotion": false },
+    "exposure": { "enabled": true, "shadowClipReviewAbove": 0.52, "highlightClipReviewAbove": 0.28, "protectLowLight": true },
+    "face": { "mode": "optional", "checkEyes": true, "checkExpression": true, "minimumFacePixels": 72, "closedEyesAction": "review" },
+    "aesthetic": { "mode": "rank-within-group", "weight": 0.2, "canHardReject": false }
+  },
+  "decisionPolicy": {
+    "noAllowedSubject": "review",
+    "unreadablePreview": "reject",
+    "hardRejectRequires": ["readable_preview", "subject_detector_ready", "face_and_subject_unusable"],
+    "humanDecisionWins": true,
+    "ambiguousAction": "review"
+  },
+  "selectionGoal": { "defaultTargetCount": 50, "mode": "exact", "rankingScope": "project", "diversity": "burst-aware", "insufficientEligible": "return-all-eligible", "preserveHumanDecisions": true },
+  "burstPolicy": { "enabled": true, "protectBestPerGroup": 2, "rankingSignals": ["face_focus", "eyes_open", "subject_focus", "expression", "exposure", "aesthetic"] },
+  "fallbackPolicy": {
+    "subjectDetectorUnavailable": "review",
+    "faceModelUnavailable": "skip-face-signals",
+    "aestheticModelUnavailable": "preserve-original-order",
+    "cloudUnavailable": "use-local-signals",
+    "rawUploadAllowed": false
+  },
+  "acceptanceExamples": [
+    { "case": "sharp face", "given": "The nearest primary face is sharp with open eyes, usable expression and exposure.", "expected": "keep", "reason": "The principal portrait evidence is usable.", "requiredSignals": ["face_focus", "eyes_open", "expression", "exposure"] },
+    { "case": "closed eyes", "given": "A sufficiently large primary face has both eyes closed in an otherwise readable frame.", "expected": "review", "reason": "Closed eyes can be intentional and require human judgment.", "requiredSignals": ["eyes_open", "face_size"] },
+    { "case": "small face", "given": "Every face is smaller than the minimum reliable face size.", "expected": "review", "reason": "The system must not claim a reliable eye or expression result.", "requiredSignals": ["face_size"] },
+    { "case": "environmental portrait", "given": "The person is small but the scene clearly forms an intentional environmental portrait.", "expected": "keep", "reason": "Configured context is protected even when face analysis is unavailable.", "requiredSignals": ["allowed_subjects", "scene_context"] },
+    { "case": "face model unavailable", "given": "Person detection works but the face model is unavailable.", "expected": "review", "reason": "Skip eye and expression checks rather than inventing negative evidence.", "requiredSignals": ["face_model_unavailable", "subject_focus"] }
+  ]
+}

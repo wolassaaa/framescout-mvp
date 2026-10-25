@@ -1,0 +1,8 @@
+numpy>=1.26
+Pillow>=10.0
+
+[dev]
+pytest>=8.0
+
+[yolo]
+ultralytics>=8.3

@@ -1,0 +1,44 @@
+{
+  "$schema": "./review-strategy.schema.json",
+  "schemaVersion": 1,
+  "id": "action-coverage",
+  "version": 1,
+  "name": { "zh": "动作覆盖", "en": "Action coverage" },
+  "note": { "zh": "快速筛出有人物主体的清晰动作画面。", "en": "Prioritize clear action frames containing a person." },
+  "intent": "Triage high-volume action coverage while rejecting an empty frame only when a working detector and a sharp readable proxy make that conclusion reliable.",
+  "subjects": {
+    "allowedLabels": ["person"],
+    "minimumConfidence": 0.25,
+    "protectSmallSubjects": true,
+    "protectedContexts": []
+  },
+  "signals": {
+    "focus": { "enabled": true, "regionPriority": ["subject", "global"], "reviewBelow": 32, "rejectBelow": 12, "protectIntentionalMotion": false },
+    "exposure": { "enabled": true, "shadowClipReviewAbove": 0.45, "highlightClipReviewAbove": 0.35, "protectLowLight": false },
+    "face": { "mode": "off", "checkEyes": false, "checkExpression": false, "minimumFacePixels": 0, "closedEyesAction": "review" },
+    "aesthetic": { "mode": "rank-within-group", "weight": 0.1, "canHardReject": false }
+  },
+  "decisionPolicy": {
+    "noAllowedSubject": "reject",
+    "unreadablePreview": "reject",
+    "hardRejectRequires": ["readable_preview", "subject_detector_ready", "no_allowed_subject", "sharp_global_frame"],
+    "humanDecisionWins": true,
+    "ambiguousAction": "review"
+  },
+  "selectionGoal": { "defaultTargetCount": 100, "mode": "exact", "rankingScope": "project", "diversity": "burst-aware", "insufficientEligible": "return-all-eligible", "preserveHumanDecisions": true },
+  "burstPolicy": { "enabled": true, "protectBestPerGroup": 1, "rankingSignals": ["subject_focus", "exposure"] },
+  "fallbackPolicy": {
+    "subjectDetectorUnavailable": "review",
+    "faceModelUnavailable": "skip-face-signals",
+    "aestheticModelUnavailable": "preserve-original-order",
+    "cloudUnavailable": "use-local-signals",
+    "rawUploadAllowed": false
+  },
+  "acceptanceExamples": [
+    { "case": "sharp athlete", "given": "A person is detected and the subject crop is clearly sharp.", "expected": "keep", "reason": "Reliable subject focus supports an action frame.", "requiredSignals": ["allowed_subjects", "subject_focus"] },
+    { "case": "sharp empty frame", "given": "A readable sharp proxy has no person with a working detector.", "expected": "reject", "reason": "All empty-frame hard-reject prerequisites are present.", "requiredSignals": ["readable_preview", "subject_detector_ready", "no_allowed_subject", "sharp_global_frame"] },
+    { "case": "soft empty frame", "given": "No person is detected but the global frame is too soft to trust.", "expected": "review", "reason": "A missing hard-reject prerequisite must downgrade the decision.", "requiredSignals": ["no_allowed_subject", "global_focus"] },
+    { "case": "soft subject", "given": "A person is detected but available focus evidence is weak.", "expected": "review", "reason": "Softness without the configured hard-reject evidence remains ambiguous.", "requiredSignals": ["allowed_subjects", "subject_focus"] },
+    { "case": "detector unavailable", "given": "The person detector is unavailable for this analysis run.", "expected": "review", "reason": "Missing capability cannot be fabricated as an empty frame.", "requiredSignals": ["subject_detector_unavailable"] }
+  ]
+}

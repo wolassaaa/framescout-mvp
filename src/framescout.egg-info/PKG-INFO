@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: framescout
+Version: 0.1.0
+Summary: Local-first technical culling and tagging for sports photography
+Requires-Python: >=3.10
+Requires-Dist: numpy>=1.26
+Requires-Dist: Pillow>=10.0
+Provides-Extra: yolo
+Requires-Dist: ultralytics>=8.3; extra == "yolo"
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"

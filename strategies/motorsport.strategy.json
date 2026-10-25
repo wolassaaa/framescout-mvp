@@ -1,0 +1,44 @@
+{
+  "$schema": "./review-strategy.schema.json",
+  "schemaVersion": 1,
+  "id": "motorsport",
+  "version": 1,
+  "name": { "zh": "赛车运动", "en": "Motorsport" },
+  "note": { "zh": "识别人车主体并保护追焦与赛道环境。", "en": "Recognize people and vehicles while protecting panning intent." },
+  "intent": "Review motorsport coverage using people and road vehicles as allowed subjects while protecting panning blur and pit, track and crowd context.",
+  "subjects": {
+    "allowedLabels": ["person", "car", "motorcycle", "bus", "truck"],
+    "minimumConfidence": 0.25,
+    "protectSmallSubjects": true,
+    "protectedContexts": ["pit", "track", "crowd"]
+  },
+  "signals": {
+    "focus": { "enabled": true, "regionPriority": ["subject", "global"], "reviewBelow": 28, "rejectBelow": 9, "protectIntentionalMotion": true },
+    "exposure": { "enabled": true, "shadowClipReviewAbove": 0.5, "highlightClipReviewAbove": 0.38, "protectLowLight": false },
+    "face": { "mode": "off", "checkEyes": false, "checkExpression": false, "minimumFacePixels": 0, "closedEyesAction": "review" },
+    "aesthetic": { "mode": "rank-within-group", "weight": 0.1, "canHardReject": false }
+  },
+  "decisionPolicy": {
+    "noAllowedSubject": "review",
+    "unreadablePreview": "reject",
+    "hardRejectRequires": ["readable_preview", "subject_detector_ready", "subject_out_of_focus"],
+    "humanDecisionWins": true,
+    "ambiguousAction": "review"
+  },
+  "selectionGoal": { "defaultTargetCount": 100, "mode": "exact", "rankingScope": "project", "diversity": "burst-aware", "insufficientEligible": "return-all-eligible", "preserveHumanDecisions": true },
+  "burstPolicy": { "enabled": true, "protectBestPerGroup": 2, "rankingSignals": ["subject_focus", "intentional_motion", "exposure"] },
+  "fallbackPolicy": {
+    "subjectDetectorUnavailable": "review",
+    "faceModelUnavailable": "skip-face-signals",
+    "aestheticModelUnavailable": "preserve-original-order",
+    "cloudUnavailable": "use-local-signals",
+    "rawUploadAllowed": false
+  },
+  "acceptanceExamples": [
+    { "case": "sharp race car", "given": "A car is detected with a sharp subject crop.", "expected": "keep", "reason": "Vehicle focus supports a technically usable race frame.", "requiredSignals": ["allowed_subjects", "subject_focus"] },
+    { "case": "panned race car", "given": "A car is supported by intentional panning motion evidence.", "expected": "keep", "reason": "Configured motion protection prevents a global-softness reject.", "requiredSignals": ["allowed_subjects", "intentional_motion"] },
+    { "case": "pit context", "given": "A pit scene is recognized even without a prominent vehicle.", "expected": "keep", "reason": "Pit coverage is protected motorsport context.", "requiredSignals": ["scene_context"] },
+    { "case": "empty track", "given": "No person or allowed vehicle is detected on the track.", "expected": "review", "reason": "An empty motorsport scene may still have editorial value.", "requiredSignals": ["no_allowed_subject"] },
+    { "case": "detector unavailable", "given": "Vehicle and person detection is unavailable for the frame.", "expected": "review", "reason": "Missing detector capability cannot imply an empty track.", "requiredSignals": ["subject_detector_unavailable"] }
+  ]
+}

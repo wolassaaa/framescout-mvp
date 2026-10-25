@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "framescout-ai-worker"
+version = "0.1.0"
+description = "Bounded local ONNX image analysis worker for FrameScout"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=2.0",
+  "pillow>=10.0",
+]
+
+[project.optional-dependencies]
+onnx-gpu = ["onnxruntime-gpu>=1.24"]
+onnx-cpu = ["onnxruntime>=1.24"]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+framescout-ai = "framescout_ai.worker:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/framescout_ai"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+

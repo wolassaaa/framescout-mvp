@@ -1,0 +1,44 @@
+{
+  "$schema": "./review-strategy.schema.json",
+  "schemaVersion": 1,
+  "id": "conservative-base",
+  "version": 1,
+  "name": { "zh": "基础审查", "en": "Conservative base" },
+  "note": { "zh": "保护可用主体，证据不确定时统一进入复核。", "en": "Protect usable subjects and review uncertain evidence." },
+  "intent": "Provide a conservative starting point for a new photography review strategy without allowing weak model evidence to hard-reject a frame.",
+  "subjects": {
+    "allowedLabels": ["person"],
+    "minimumConfidence": 0.25,
+    "protectSmallSubjects": true,
+    "protectedContexts": []
+  },
+  "signals": {
+    "focus": { "enabled": true, "regionPriority": ["subject", "global"], "reviewBelow": 30, "rejectBelow": 12, "protectIntentionalMotion": false },
+    "exposure": { "enabled": true, "shadowClipReviewAbove": 0.45, "highlightClipReviewAbove": 0.35, "protectLowLight": false },
+    "face": { "mode": "off", "checkEyes": false, "checkExpression": false, "minimumFacePixels": 0, "closedEyesAction": "review" },
+    "aesthetic": { "mode": "off", "weight": 0, "canHardReject": false }
+  },
+  "decisionPolicy": {
+    "noAllowedSubject": "review",
+    "unreadablePreview": "reject",
+    "hardRejectRequires": ["unreadable_preview"],
+    "humanDecisionWins": true,
+    "ambiguousAction": "review"
+  },
+  "selectionGoal": { "defaultTargetCount": 50, "mode": "exact", "rankingScope": "project", "diversity": "burst-aware", "insufficientEligible": "return-all-eligible", "preserveHumanDecisions": true },
+  "burstPolicy": { "enabled": true, "protectBestPerGroup": 1, "rankingSignals": ["subject_focus", "exposure"] },
+  "fallbackPolicy": {
+    "subjectDetectorUnavailable": "review",
+    "faceModelUnavailable": "skip-face-signals",
+    "aestheticModelUnavailable": "preserve-original-order",
+    "cloudUnavailable": "use-local-signals",
+    "rawUploadAllowed": false
+  },
+  "acceptanceExamples": [
+    { "case": "sharp subject", "given": "The allowed subject is sharp and exposure is usable.", "expected": "keep", "reason": "The primary technical evidence supports the frame.", "requiredSignals": ["subject_focus", "exposure"] },
+    { "case": "soft subject", "given": "The subject crop is soft but the preview remains readable.", "expected": "review", "reason": "Softness alone is not sufficient for a hard rejection.", "requiredSignals": ["subject_focus"] },
+    { "case": "empty frame", "given": "No allowed subject is detected with a working detector.", "expected": "review", "reason": "The base strategy remains conservative about empty frames.", "requiredSignals": ["allowed_subjects"] },
+    { "case": "unreadable proxy", "given": "The proxy cannot be decoded or contains no usable image data.", "expected": "reject", "reason": "Unreadable preview is the only default hard-reject condition.", "requiredSignals": ["unreadable_preview"] },
+    { "case": "detector unavailable", "given": "The subject detector fails to load for this run.", "expected": "review", "reason": "Missing inference cannot be treated as a zero-subject result.", "requiredSignals": ["subject_detector_unavailable"] }
+  ]
+}

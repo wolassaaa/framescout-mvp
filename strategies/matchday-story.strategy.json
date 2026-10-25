@@ -1,0 +1,44 @@
+{
+  "$schema": "./review-strategy.schema.json",
+  "schemaVersion": 1,
+  "id": "matchday-story",
+  "version": 1,
+  "name": { "zh": "比赛故事", "en": "Matchday story" },
+  "note": { "zh": "保留观众、场馆与奖杯等叙事环境画面。", "en": "Preserve crowd, venue and trophy context for the full story." },
+  "intent": "Protect editorial match context and keep recognized crowd, venue and trophy scenes even when no person is detected, while reviewing uncertain empty frames.",
+  "subjects": {
+    "allowedLabels": ["person"],
+    "minimumConfidence": 0.25,
+    "protectSmallSubjects": true,
+    "protectedContexts": ["crowd", "venue", "trophy"]
+  },
+  "signals": {
+    "focus": { "enabled": true, "regionPriority": ["subject", "global"], "reviewBelow": 28, "rejectBelow": 10, "protectIntentionalMotion": false },
+    "exposure": { "enabled": true, "shadowClipReviewAbove": 0.5, "highlightClipReviewAbove": 0.38, "protectLowLight": true },
+    "face": { "mode": "off", "checkEyes": false, "checkExpression": false, "minimumFacePixels": 0, "closedEyesAction": "review" },
+    "aesthetic": { "mode": "rank-within-group", "weight": 0.1, "canHardReject": false }
+  },
+  "decisionPolicy": {
+    "noAllowedSubject": "review",
+    "unreadablePreview": "reject",
+    "hardRejectRequires": ["readable_preview", "subject_detector_ready", "subject_out_of_focus"],
+    "humanDecisionWins": true,
+    "ambiguousAction": "review"
+  },
+  "selectionGoal": { "defaultTargetCount": 100, "mode": "exact", "rankingScope": "project", "diversity": "burst-aware", "insufficientEligible": "return-all-eligible", "preserveHumanDecisions": true },
+  "burstPolicy": { "enabled": true, "protectBestPerGroup": 2, "rankingSignals": ["subject_focus", "scene_context", "exposure"] },
+  "fallbackPolicy": {
+    "subjectDetectorUnavailable": "review",
+    "faceModelUnavailable": "skip-face-signals",
+    "aestheticModelUnavailable": "preserve-original-order",
+    "cloudUnavailable": "use-local-signals",
+    "rawUploadAllowed": false
+  },
+  "acceptanceExamples": [
+    { "case": "venue overview", "given": "A venue context is recognized with no visible person.", "expected": "keep", "reason": "The venue is protected editorial match context.", "requiredSignals": ["scene_context", "no_allowed_subject"] },
+    { "case": "crowd reaction", "given": "A crowd scene is recognized as matchday atmosphere.", "expected": "keep", "reason": "Crowd coverage contributes to the complete event story.", "requiredSignals": ["scene_context"] },
+    { "case": "unclassified empty", "given": "No person or protected context is detected in a readable frame.", "expected": "review", "reason": "Story value is ambiguous and needs a photographer decision.", "requiredSignals": ["no_allowed_subject"] },
+    { "case": "unusable subject", "given": "A detected person's crop is below the hard focus threshold.", "expected": "reject", "reason": "Readable subject-specific evidence meets every hard-reject prerequisite.", "requiredSignals": ["readable_preview", "subject_detector_ready", "subject_out_of_focus"] },
+    { "case": "detector unavailable", "given": "The person detector cannot run for the current proxy.", "expected": "review", "reason": "Unavailable detection cannot be treated as no subject.", "requiredSignals": ["subject_detector_unavailable"] }
+  ]
+}

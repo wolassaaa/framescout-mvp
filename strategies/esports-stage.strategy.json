@@ -1,0 +1,44 @@
+{
+  "$schema": "./review-strategy.schema.json",
+  "schemaVersion": 1,
+  "id": "esports-stage",
+  "version": 1,
+  "name": { "zh": "电竞舞台", "en": "Esports stage" },
+  "note": { "zh": "保护低光人物、舞台、屏幕与观众场景。", "en": "Protect low-light people, stage, screen and crowd coverage." },
+  "intent": "Preserve low-light esports storytelling by accepting people, televisions and laptops as subjects and protecting stage, screen, crowd and trophy contexts.",
+  "subjects": {
+    "allowedLabels": ["person", "tv", "laptop"],
+    "minimumConfidence": 0.22,
+    "protectSmallSubjects": true,
+    "protectedContexts": ["stage", "screen", "crowd", "trophy"]
+  },
+  "signals": {
+    "focus": { "enabled": true, "regionPriority": ["subject", "global"], "reviewBelow": 24, "rejectBelow": 8, "protectIntentionalMotion": false },
+    "exposure": { "enabled": true, "shadowClipReviewAbove": 0.65, "highlightClipReviewAbove": 0.45, "protectLowLight": true },
+    "face": { "mode": "off", "checkEyes": false, "checkExpression": false, "minimumFacePixels": 0, "closedEyesAction": "review" },
+    "aesthetic": { "mode": "rank-within-group", "weight": 0.1, "canHardReject": false }
+  },
+  "decisionPolicy": {
+    "noAllowedSubject": "review",
+    "unreadablePreview": "reject",
+    "hardRejectRequires": ["readable_preview", "subject_detector_ready", "subject_out_of_focus"],
+    "humanDecisionWins": true,
+    "ambiguousAction": "review"
+  },
+  "selectionGoal": { "defaultTargetCount": 100, "mode": "exact", "rankingScope": "project", "diversity": "burst-aware", "insufficientEligible": "return-all-eligible", "preserveHumanDecisions": true },
+  "burstPolicy": { "enabled": true, "protectBestPerGroup": 2, "rankingSignals": ["subject_focus", "scene_context", "exposure"] },
+  "fallbackPolicy": {
+    "subjectDetectorUnavailable": "review",
+    "faceModelUnavailable": "skip-face-signals",
+    "aestheticModelUnavailable": "preserve-original-order",
+    "cloudUnavailable": "use-local-signals",
+    "rawUploadAllowed": false
+  },
+  "acceptanceExamples": [
+    { "case": "sharp low light player", "given": "A player crop is sharp in a deliberately low-light stage frame.", "expected": "keep", "reason": "Usable subject focus protects intentional low-light exposure.", "requiredSignals": ["allowed_subjects", "subject_focus", "low_light"] },
+    { "case": "gameplay screen", "given": "A television or laptop screen is detected as the primary subject.", "expected": "keep", "reason": "Configured screen-device classes are valid esports subjects.", "requiredSignals": ["allowed_subjects"] },
+    { "case": "trophy stage", "given": "A trophy or stage context is recognized without a visible player.", "expected": "keep", "reason": "Protected context contributes to event storytelling.", "requiredSignals": ["scene_context"] },
+    { "case": "unclassified empty", "given": "No allowed subject or protected context is detected.", "expected": "review", "reason": "The frame remains available for an editorial decision.", "requiredSignals": ["no_allowed_subject"] },
+    { "case": "detector unavailable", "given": "Local subject detection cannot run for the proxy.", "expected": "review", "reason": "Unavailable capability must not fabricate a zero-subject result.", "requiredSignals": ["subject_detector_unavailable"] }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "name": "framescout-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FrameScout desktop workspace and reference prototype",
+  "workspaces": [
+    "apps/desktop",
+    "packages/contracts",
+    "packages/design-tokens"
+  ],
+  "scripts": {
+    "dev": "npm --workspace @framescout/desktop run dev",
+    "dev:service": "cargo run -p framescout-local-service",
+    "web:open": "powershell -ExecutionPolicy Bypass -File scripts\\start-web.ps1",
+    "package:review": "powershell -ExecutionPolicy Bypass -File scripts\\package-review.ps1",
+    "ai:capabilities": "apps\\ai-worker\\.venv\\Scripts\\framescout-ai.exe --model models\\yolox_s.onnx --backend auto capabilities",
+    "test:ai": "apps\\ai-worker\\.venv\\Scripts\\python.exe -m pytest apps\\ai-worker\\tests -q",
+    "build": "npm --workspace @framescout/desktop run build",
+    "test": "npm --workspace @framescout/desktop run test && npm run test:contracts",
+    "test:contracts": "vitest run tests/contracts",
+    "test:python": "pytest",
+    "test:e2e": "playwright test",
+    "test:service-smoke": "node scripts/service-smoke.cjs",
+    "test:e2e:update": "playwright test --update-snapshots"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.45.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

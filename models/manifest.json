@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "models": [
+    {
+      "id": "yolox-nano-coco-0.1.1rc0",
+      "file": "yolox_nano.onnx",
+      "sourceUrl": "https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_nano.onnx",
+      "sourceRepository": "https://github.com/Megvii-BaseDetection/YOLOX",
+      "license": "Apache-2.0 repository; pretrained-weight redistribution requires release review",
+      "redistributionPermission": "development-only-pending-review",
+      "sha256": "c789161ed43c8269fcd4e67c67eeb4e80c622da2eb296a20bc6007bd18a0b7d",
+      "inputSize": [416, 416],
+      "classes": "COCO-80",
+      "quantization": "FP32",
+      "benchmarkDate": "2026-07-13",
+      "benchmarkReport": "docs/model-candidate-survey.md#first-local-baseline",
+      "requiredAttribution": "YOLOX authors and Apache-2.0 notice"
+    },
+    {
+      "id": "yolox-s-coco-0.1.1rc0",
+      "file": "yolox_s.onnx",
+      "sourceUrl": "https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_s.onnx",
+      "sourceRepository": "https://github.com/Megvii-BaseDetection/YOLOX",
+      "license": "Apache-2.0 repository; pretrained-weight redistribution requires release review",
+      "redistributionPermission": "development-only-pending-review",
+      "sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+      "inputSize": [640, 640],
+      "classes": "COCO-80",
+      "quantization": "FP32",
+      "benchmarkDate": "2026-07-13",
+      "benchmarkReport": "docs/model-candidate-survey.md#first-local-baseline",
+      "requiredAttribution": "YOLOX authors and Apache-2.0 notice"
+    }
+  ]
+}

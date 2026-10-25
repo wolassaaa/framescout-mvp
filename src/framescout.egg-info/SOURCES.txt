@@ -1,0 +1,16 @@
+README.md
+pyproject.toml
+src/framescout/__init__.py
+src/framescout/cli.py
+src/framescout/detection.py
+src/framescout/models.py
+src/framescout/pipeline.py
+src/framescout/quality.py
+src/framescout/xmp.py
+src/framescout.egg-info/PKG-INFO
+src/framescout.egg-info/SOURCES.txt
+src/framescout.egg-info/dependency_links.txt
+src/framescout.egg-info/entry_points.txt
+src/framescout.egg-info/requires.txt
+src/framescout.egg-info/top_level.txt
+tests/test_pipeline.py
