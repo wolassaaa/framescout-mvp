@@ -46,3 +46,6 @@ _internal/
 *.dll
 *.pkg
 *.pyd
+
+# agent process files
+.superpowers/
